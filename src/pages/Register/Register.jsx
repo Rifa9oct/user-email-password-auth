@@ -1,8 +1,9 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import auth from "../../firebase/firebase.config";
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Link } from "react-router-dom";
+import swal from 'sweetalert';
 
 const Register = () => {
     const [registerError, setRegisterError] = useState('');
@@ -11,6 +12,8 @@ const Register = () => {
 
     const handleRegister = e => {
         e.preventDefault();
+        const name = e.target.name.value;
+        const photoUrl = e.target.photo.value;
         const email = e.target.email.value;
         const password = e.target.password.value;
         const accepted = e.target.terms.checked;
@@ -19,6 +22,7 @@ const Register = () => {
         setRegisterError("");
         setSuccess("");
 
+        //password verification
         if (password.length < 6) {
             setRegisterError("Password should be at least 6 characters or longer");
             return;
@@ -36,6 +40,18 @@ const Register = () => {
             .then(result => {
                 setSuccess("User created successfully");
                 console.log(result.user);
+
+                //update user
+                updateProfile(result.user,{
+                    displayName: name,
+                    photoURL: photoUrl
+                })
+
+                //verification email
+                sendEmailVerification(result.user)
+                .then(()=>{
+                    swal("Please check your email and verify your account");
+                })
             })
             .catch(error => {
                 setRegisterError(error.message);
@@ -48,6 +64,18 @@ const Register = () => {
                 <h1 className="text-center mb-8 text-5xl font-bold">Register now !</h1>
                 <div className="card w-full max-w-sm shadow-2xl bg-base-100">
                     <form onSubmit={handleRegister} className="card-body">
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text">Your name</span>
+                            </label>
+                            <input type="text" name="name" placeholder="your name" className="input input-bordered" required />
+                        </div>
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text">Photo URL</span>
+                            </label>
+                            <input type="text" name="photo" placeholder="photo url" className="input input-bordered" required />
+                        </div>
                         <div className="form-control">
                             <label className="label">
                                 <span className="label-text">Email</span>

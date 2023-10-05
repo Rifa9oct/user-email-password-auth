@@ -15,8 +15,15 @@ const Login = () => {
         const password = e.target.password.value;
 
         signInWithEmailAndPassword(auth, email, password)
-            .then(() => {
-                swal("Good job!", "User Login successfully!", "success");
+            .then(result => {
+                //console.log(result.user);
+                if(result.user.emailVerified){
+                    swal("Good job!", "User Login successfully!", "success");
+                }
+                else{
+                    swal("Opps!", "Please verify your account", "error");
+                }
+                
             })
             .catch(() => {
                 swal("Opps!","Invalid password", "error");
